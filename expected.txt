@@ -321,7 +321,7 @@
          #18 textarea.body [rows="10" placeholder="Note"] value=""
 
 --- frame 13  (clicks fed to guest: []) ---
-   [type] #18 = "word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"
+   [type] #18 = "Ўзбек,оʻзбек,word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"
    [page] 18 nodes
    #1 body
      #2 div.notes {click input}
@@ -340,7 +340,7 @@
            #15 button [data-k="delete"]
              #16 "Delete"
          #17 input.title [placeholder="Title"] value="" (focused)
-         #18 textarea.body [rows="10" placeholder="Note"] value="word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"
+         #18 textarea.body [rows="10" placeholder="Note"] value="Ўзбек,оʻзбек,word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"
 
 --- frame 14  (clicks fed to guest: []) ---
    [tap] #13
@@ -357,7 +357,7 @@
          #10 div.cards
            #34 div.card [data-k="open:3"]
              #35 div.b
-               #36 "word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12…"
+               #36 "Ўзбек,оʻзбек,word00,word01,word02,word03,word04,word05,word06,word07,word08,wor…"
        #11 div.editor.hidden
          #12 div.bar
            #13 button [data-k="back"]
@@ -365,7 +365,7 @@
            #15 button [data-k="delete"]
              #16 "Delete"
          #17 input.title [placeholder="Title"] value="" (focused)
-         #18 textarea.body [rows="10" placeholder="Note"] value="word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"
+         #18 textarea.body [rows="10" placeholder="Note"] value="Ўзбек,оʻзбек,word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"
 
 --- frame 15  (clicks fed to guest: []) ---
    [page] 21 nodes
@@ -381,7 +381,7 @@
          #10 div.cards
            #34 div.card [data-k="open:3"]
              #35 div.b
-               #36 "word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12…"
+               #36 "Ўзбек,оʻзбек,word00,word01,word02,word03,word04,word05,word06,word07,word08,wor…"
        #11 div.editor.hidden
          #12 div.bar
            #13 button [data-k="back"]
@@ -389,4 +389,4 @@
            #15 button [data-k="delete"]
              #16 "Delete"
          #17 input.title [placeholder="Title"] value="" (focused)
-         #18 textarea.body [rows="10" placeholder="Note"] value="word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"
+         #18 textarea.body [rows="10" placeholder="Note"] value="Ўзбек,оʻзбек,word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"

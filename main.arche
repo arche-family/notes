@@ -260,38 +260,51 @@ fn save(state: &Notes, host: &mut std.Host, a: alloc.Allocator) {
 }
 
 fn escape(out: &mut alloc.String, s: str) {
-    for c in s.bytes() {
-        if c.* == '\\' {
-            out.push_str("\\\\");
-        } else if c.* == '\t' {
-            out.push_str("\\t");
-        } else if c.* == '\n' {
-            out.push_str("\\n");
-        } else {
-            out.push_ascii(c.*);
+    // Whole runs between the bytes escaped, so that any UTF-8 stays as it
+    // is: \, a tab and a line end are ASCII, never inside a character.
+    let b = s.bytes();
+    var start: usize = 0;
+    var i: usize = 0;
+    while i < b.len() : (i += 1) {
+        if b[i] == '\\' or b[i] == '\t' or b[i] == '\n' {
+            out.push_str(s[start..i]);
+            if b[i] == '\\' {
+                out.push_str("\\\\");
+            } else if b[i] == '\t' {
+                out.push_str("\\t");
+            } else {
+                out.push_str("\\n");
+            }
+            start = i + 1;
         }
     }
+    out.push_str(s[start..b.len()]);
 }
 
 /// s with its escapes undone.
 fn unescape(s: str, a: alloc.Allocator) -> alloc.String {
     var out = alloc.String.init(a);
     let b = s.bytes();
+    var start: usize = 0;
     var i: usize = 0;
-    while i < b.len() : (i += 1) {
+    while i < b.len() {
         if b[i] == '\\' and i + 1 < b.len() {
-            i += 1;
-            if b[i] == 't' {
+            out.push_str(s[start..i]);
+            let e = b[i + 1];
+            if e == 't' {
                 out.push_str("\t");
-            } else if b[i] == 'n' {
+            } else if e == 'n' {
                 out.push_str("\n");
-            } else {
-                out.push_ascii(b[i]);
+            } else if e == '\\' {
+                out.push_str("\\");
             }
+            i += 2;
+            start = i;
         } else {
-            out.push_ascii(b[i]);
+            i += 1;
         }
     }
+    out.push_str(s[start..b.len()]);
     return out;
 }
 
