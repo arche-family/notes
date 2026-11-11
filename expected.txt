@@ -1,0 +1,392 @@
+=== headless run: 16 frames ===
+
+--- frame 0  (clicks fed to guest: []) ---
+   [page] 18 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty
+           #9 "No notes yet"
+         #10 div.cards
+       #11 div.editor.hidden
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value=""
+         #18 textarea.body [rows="10" placeholder="Note"] value=""
+
+--- frame 1  (clicks fed to guest: []) ---
+   [tap] #6
+   [page] 18 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list.hidden
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty
+           #9 "No notes yet"
+         #10 div.cards
+       #11 div.editor
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value=""
+
+--- frame 2  (clicks fed to guest: []) ---
+   [type] #17 = "Shopping"
+   [page] 18 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list.hidden
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty
+           #9 "No notes yet"
+         #10 div.cards
+       #11 div.editor
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="Shopping" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value=""
+
+--- frame 3  (clicks fed to guest: []) ---
+   [type] #18 = "Milk,eggs,bread"
+   [page] 18 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list.hidden
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty
+           #9 "No notes yet"
+         #10 div.cards
+       #11 div.editor
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="Shopping" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value="Milk,eggs,bread"
+
+--- frame 4  (clicks fed to guest: []) ---
+   [tap] #13
+   [page] 23 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty.hidden
+           #9 "No notes yet"
+         #10 div.cards
+           #19 div.card [data-k="open:1"]
+             #20 div.t
+               #21 "Shopping"
+             #22 div.b
+               #23 "Milk,eggs,bread"
+       #11 div.editor.hidden
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="Shopping" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value="Milk,eggs,bread"
+
+--- frame 5  (clicks fed to guest: []) ---
+   [tap] #6
+   [page] 23 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list.hidden
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty.hidden
+           #9 "No notes yet"
+         #10 div.cards
+           #19 div.card [data-k="open:1"]
+             #20 div.t
+               #21 "Shopping"
+             #22 div.b
+               #23 "Milk,eggs,bread"
+       #11 div.editor
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value=""
+
+--- frame 6  (clicks fed to guest: []) ---
+   [tap] #13
+   [page] 23 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty.hidden
+           #9 "No notes yet"
+         #10 div.cards
+           #24 div.card [data-k="open:1"]
+             #25 div.t
+               #26 "Shopping"
+             #27 div.b
+               #28 "Milk,eggs,bread"
+       #11 div.editor.hidden
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value=""
+
+--- frame 7  (clicks fed to guest: []) ---
+   [tap] #27
+   [page] 23 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list.hidden
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty.hidden
+           #9 "No notes yet"
+         #10 div.cards
+           #24 div.card [data-k="open:1"]
+             #25 div.t
+               #26 "Shopping"
+             #27 div.b
+               #28 "Milk,eggs,bread"
+       #11 div.editor
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="Shopping" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value="Milk,eggs,bread"
+
+--- frame 8  (clicks fed to guest: []) ---
+   [type] #18 = "Milk,eggs,bread,tea"
+   [page] 23 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list.hidden
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty.hidden
+           #9 "No notes yet"
+         #10 div.cards
+           #24 div.card [data-k="open:1"]
+             #25 div.t
+               #26 "Shopping"
+             #27 div.b
+               #28 "Milk,eggs,bread"
+       #11 div.editor
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="Shopping" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value="Milk,eggs,bread,tea"
+
+--- frame 9  (clicks fed to guest: []) ---
+   [tap] #13
+   [page] 23 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty.hidden
+           #9 "No notes yet"
+         #10 div.cards
+           #29 div.card [data-k="open:1"]
+             #30 div.t
+               #31 "Shopping"
+             #32 div.b
+               #33 "Milk,eggs,bread,tea"
+       #11 div.editor.hidden
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="Shopping" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value="Milk,eggs,bread,tea"
+
+--- frame 10  (clicks fed to guest: []) ---
+   [tap] #30
+   [page] 23 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list.hidden
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty.hidden
+           #9 "No notes yet"
+         #10 div.cards
+           #29 div.card [data-k="open:1"]
+             #30 div.t
+               #31 "Shopping"
+             #32 div.b
+               #33 "Milk,eggs,bread,tea"
+       #11 div.editor
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="Shopping" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value="Milk,eggs,bread,tea"
+
+--- frame 11  (clicks fed to guest: []) ---
+   [tap] #15
+   [page] 18 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty
+           #9 "No notes yet"
+         #10 div.cards
+       #11 div.editor.hidden
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="Shopping" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value="Milk,eggs,bread,tea"
+
+--- frame 12  (clicks fed to guest: []) ---
+   [tap] #6
+   [page] 18 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list.hidden
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty
+           #9 "No notes yet"
+         #10 div.cards
+       #11 div.editor
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value=""
+
+--- frame 13  (clicks fed to guest: []) ---
+   [type] #18 = "word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"
+   [page] 18 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list.hidden
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty
+           #9 "No notes yet"
+         #10 div.cards
+       #11 div.editor
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value="word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"
+
+--- frame 14  (clicks fed to guest: []) ---
+   [tap] #13
+   [page] 21 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty.hidden
+           #9 "No notes yet"
+         #10 div.cards
+           #34 div.card [data-k="open:3"]
+             #35 div.b
+               #36 "word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12…"
+       #11 div.editor.hidden
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value="word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"
+
+--- frame 15  (clicks fed to guest: []) ---
+   [page] 21 nodes
+   #1 body
+     #2 div.notes {click input}
+       #3 div.list
+         #4 h1
+           #5 "Notes"
+         #6 button.go [data-k="new"]
+           #7 "New note"
+         #8 div.empty.hidden
+           #9 "No notes yet"
+         #10 div.cards
+           #34 div.card [data-k="open:3"]
+             #35 div.b
+               #36 "word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12…"
+       #11 div.editor.hidden
+         #12 div.bar
+           #13 button [data-k="back"]
+             #14 "Back"
+           #15 button [data-k="delete"]
+             #16 "Delete"
+         #17 input.title [placeholder="Title"] value="" (focused)
+         #18 textarea.body [rows="10" placeholder="Note"] value="word00,word01,word02,word03,word04,word05,word06,word07,word08,word09,word10,word11,word12,word13,word14,word15"

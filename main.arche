@@ -1,0 +1,361 @@
+/// Notes, the Arche phone's, written in Arche, as Android's notes apps
+/// are: the notes as cards, the one changed last first, each its title
+/// and the start of its text; New note, and a note opened to its title and
+/// its text, which are kept as they are typed, with Back and Delete. A
+/// note left with nothing in it is not kept. An app of the page: its taps
+/// come as click events and its typing as input events. The notes are
+/// kept in the app's storage, a line each: its number, title and text,
+/// parted by tabs, with \ escaping a tab (\t), a line end (\n) and itself.
+import alloc;
+import dom;
+import host_api;
+import std;
+
+const SHEET: str = "body { padding: 0; } .notes { display: flex; flex-direction: column; gap: 16px; padding: 16px; } .hidden { display: none; } .list, .editor { display: flex; flex-direction: column; gap: 12px; } h1 { font-size: 32px; color: var(--nimadir-text); } .cards { display: flex; flex-direction: column; gap: 12px; } .card { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 16px; background: var(--nimadir-surface); } .t { font-size: 18px; color: var(--nimadir-text); } .b { font-size: 15px; color: var(--nimadir-muted); } .empty { font-size: 16px; color: var(--nimadir-muted); } .bar { display: flex; flex-direction: row; gap: 12px; } button { padding: 12px 24px; border-radius: 24px; font-size: 16px; border: 0; background: var(--nimadir-accent-wash); color: var(--nimadir-text); } button.go { background: var(--nimadir-accent); color: var(--nimadir-bg); } input, textarea { padding: 12px; border-radius: 12px; border: 0; background: var(--nimadir-surface); color: var(--nimadir-text); } input { font-size: 22px; } textarea { font-size: 17px; }";
+
+/// How much of a note's text its card shows.
+const PREVIEW: usize = 90;
+
+type Note = struct {
+    id: u64,
+    title: alloc.String,
+    body: alloc.String,
+}
+
+type Notes = struct {
+    /// The notes, the one changed last first.
+    all: alloc.List(Note),
+    next: u64,
+    /// The note opened; 0 for the list.
+    open: u64,
+    /// The page's nodes.
+    list: u32,
+    editor: u32,
+    cards: u32,
+    empty: u32,
+    title: u32,
+    body: u32,
+}
+
+fn init(host: &mut std.Host, a: alloc.Allocator) -> Notes {
+    _ = dom.add_stylesheet(host, css: SHEET);
+    let root = dom.root(host);
+    let markup = "<div class='notes'><div class='list'><h1>Notes</h1><button class='go' data-k='new'>New note</button><div class='empty'>No notes yet</div><div class='cards'></div></div><div class='editor hidden'><div class='bar'><button data-k='back'>Back</button><button data-k='delete'>Delete</button></div><input class='title' placeholder='Title'><textarea class='body' rows='10' placeholder='Note'></textarea></div></div>";
+    var why = alloc.String.init(a);
+    if not dom.set_markup(host, item: root, markup: markup, why: &mut why, a: a) {
+        host_api.log(host, msg: why.view());
+    }
+    let notes = first(host, selector: ".notes", a: a);
+    dom.listen(host, item: notes, kind: "click");
+    dom.listen(host, item: notes, kind: "input");
+    var state = Notes {
+        all: alloc.List(Note).init(a),
+        next: 1,
+        open: 0,
+        list: first(host, selector: ".list", a: a),
+        editor: first(host, selector: ".editor", a: a),
+        cards: first(host, selector: ".cards", a: a),
+        empty: first(host, selector: ".empty", a: a),
+        title: first(host, selector: ".title", a: a),
+        body: first(host, selector: ".body", a: a),
+    };
+    match host_api.storage_get(host, key: "notes", a: a) {
+        some(kept) => { load(&mut state, text: kept.view(), a: a); }
+        none => { }
+    }
+    show_list(&mut state, host: host, a: a);
+    return state;
+}
+
+fn update(state: &mut Notes, host: &mut std.Host, a: alloc.Allocator) {
+    for e in dom.events(host, a: a).items() {
+        if e.kind.view().eq("click") {
+            match key_of(host, n: e.target, a: a) {
+                some(k) => { press(state, host: host, key: k.view(), a: a); }
+                none => { }
+            }
+        } else if e.kind.view().eq("input") and state.open != 0 {
+            if e.target == state.title {
+                typed(state, host: host, title: true, text: e.value.view(), a: a);
+            } else if e.target == state.body {
+                typed(state, host: host, title: false, text: e.value.view(), a: a);
+            }
+        }
+    }
+}
+
+fn press(state: &mut Notes, host: &mut std.Host, key: str, a: alloc.Allocator) {
+    if key.eq("new") {
+        let id = state.next;
+        state.next += 1;
+        state.all = first_then(&state.all, n: Note { id: id, title: alloc.String.init(a), body: alloc.String.init(a) }, but: state.all.len(), a: a);
+        open_note(state, host: host, id: id);
+        dom.focus(host, item: state.title);
+    } else if key.starts_with("open:") {
+        open_note(state, host: host, id: number(key[5..key.len()]));
+    } else if key.eq("back") {
+        // A note with nothing in it is not kept.
+        let at = find(state, id: state.open);
+        if at < state.all.len() and state.all.items()[at].title.len() == 0 and state.all.items()[at].body.len() == 0 {
+            state.all = without(&state.all, but: at, a: a);
+            save(state, host: host, a: a);
+        }
+        state.open = 0;
+        show_list(state, host: host, a: a);
+    } else if key.eq("delete") {
+        let at = find(state, id: state.open);
+        if at < state.all.len() {
+            state.all = without(&state.all, but: at, a: a);
+            save(state, host: host, a: a);
+        }
+        state.open = 0;
+        show_list(state, host: host, a: a);
+    }
+}
+
+/// The note id opened: its title and text in the editor.
+fn open_note(state: &mut Notes, host: &mut std.Host, id: u64) {
+    let at = find(state, id: id);
+    if at >= state.all.len() {
+        return;
+    }
+    state.open = id;
+    let n = &state.all.items()[at];
+    dom.set_attribute(host, item: state.title, name: "value", value_: n.title.view());
+    dom.set_attribute(host, item: state.body, name: "value", value_: n.body.view());
+    dom.toggle_class(host, item: state.list, name: "hidden", on: true);
+    dom.toggle_class(host, item: state.editor, name: "hidden", on: false);
+}
+
+/// The open note's title, or its text, is text now: it is the one changed
+/// last, first, and kept.
+fn typed(state: &mut Notes, host: &mut std.Host, title: bool, text: str, a: alloc.Allocator) {
+    let at = find(state, id: state.open);
+    if at >= state.all.len() {
+        return;
+    }
+    let was = &state.all.items()[at];
+    var n = Note { id: was.id, title: alloc.String.from(was.title.view(), a), body: alloc.String.from(was.body.view(), a) };
+    if title {
+        n.title = alloc.String.from(text, a);
+    } else {
+        n.body = alloc.String.from(text, a);
+    }
+    state.all = first_then(&state.all, n: n, but: at, a: a);
+    save(state, host: host, a: a);
+}
+
+/// n, then the notes of all but the one at but (all's count for none).
+fn first_then(all: &alloc.List(Note), n: Note, but: usize, a: alloc.Allocator) -> alloc.List(Note) {
+    var out = alloc.List(Note).init(a);
+    out.push(n);
+    var k: usize = 0;
+    while k < all.len() : (k += 1) {
+        if k != but {
+            out.push(copy(&all.items()[k], a: a));
+        }
+    }
+    return out;
+}
+
+/// The notes of all but the one at but.
+fn without(all: &alloc.List(Note), but: usize, a: alloc.Allocator) -> alloc.List(Note) {
+    var out = alloc.List(Note).init(a);
+    var k: usize = 0;
+    while k < all.len() : (k += 1) {
+        if k != but {
+            out.push(copy(&all.items()[k], a: a));
+        }
+    }
+    return out;
+}
+
+fn copy(n: &Note, a: alloc.Allocator) -> Note {
+    return Note { id: n.id, title: alloc.String.from(n.title.view(), a), body: alloc.String.from(n.body.view(), a) };
+}
+
+/// Where the note id is in the notes; their count for none.
+fn find(state: &Notes, id: u64) -> usize {
+    var k: usize = 0;
+    while k < state.all.len() : (k += 1) {
+        if state.all.items()[k].id == id {
+            return k;
+        }
+    }
+    return state.all.len();
+}
+
+/// The list: a card for each note, the one changed last first.
+fn show_list(state: &mut Notes, host: &mut std.Host, a: alloc.Allocator) {
+    for c in dom.children(host, item: state.cards, a: a).items() {
+        dom.release(host, item: c.*);
+    }
+    for n in state.all.items() {
+        let card = dom.create_element(host, tag: "div");
+        dom.set_attribute(host, item: card, name: "class", value_: "card");
+        var k = alloc.String.from("open:", a);
+        k.push_u64(n.id);
+        dom.set_attribute(host, item: card, name: "data-k", value_: k.view());
+        if n.title.len() > 0 {
+            line(host, parent_: card, class: "t", text: n.title.view(), a: a);
+        }
+        if n.body.len() > 0 or n.title.len() == 0 {
+            line(host, parent_: card, class: "b", text: preview(n.body.view(), a: a).view(), a: a);
+        }
+        dom.append_child(host, parent_: state.cards, child: card);
+    }
+    dom.toggle_class(host, item: state.empty, name: "hidden", on: state.all.len() > 0);
+    dom.toggle_class(host, item: state.editor, name: "hidden", on: true);
+    dom.toggle_class(host, item: state.list, name: "hidden", on: false);
+}
+
+/// A div of class with text, last under parent_.
+fn line(host: &mut std.Host, parent_: u32, class: str, text: str, a: alloc.Allocator) {
+    let d = dom.create_element(host, tag: "div");
+    dom.set_attribute(host, item: d, name: "class", value_: class);
+    dom.set_text(host, item: d, text: text);
+    dom.append_child(host, parent_: parent_, child: d);
+}
+
+/// The start of a note's text, its lines run together, at most PREVIEW
+/// bytes and whole characters, with … when there is more.
+fn preview(text: str, a: alloc.Allocator) -> alloc.String {
+    var out = alloc.String.init(a);
+    let b = text.bytes();
+    var i: usize = 0;
+    while i < b.len() {
+        var j = i + 1;
+        while j < b.len() and (b[j] & 0xC0) == 0x80 {
+            j += 1;
+        }
+        if out.len() + (j - i) > PREVIEW {
+            out.push_str("…");
+            return out;
+        }
+        if b[i] == '\n' {
+            out.push_str(" ");
+        } else {
+            out.push_str(text[i..j]);
+        }
+        i = j;
+    }
+    return out;
+}
+
+/// The notes kept, as the app's storage has them.
+fn save(state: &Notes, host: &mut std.Host, a: alloc.Allocator) {
+    var text = alloc.String.init(a);
+    for n in state.all.items() {
+        text.push_u64(n.id);
+        text.push_str("\t");
+        escape(&mut text, s: n.title.view());
+        text.push_str("\t");
+        escape(&mut text, s: n.body.view());
+        text.push_str("\n");
+    }
+    var why = alloc.String.init(a);
+    if not host_api.storage_set(host, key: "notes", value: text.view(), why: &mut why, a: a) {
+        host_api.log(host, msg: why.view());
+    }
+}
+
+fn escape(out: &mut alloc.String, s: str) {
+    for c in s.bytes() {
+        if c.* == '\\' {
+            out.push_str("\\\\");
+        } else if c.* == '\t' {
+            out.push_str("\\t");
+        } else if c.* == '\n' {
+            out.push_str("\\n");
+        } else {
+            out.push_ascii(c.*);
+        }
+    }
+}
+
+/// s with its escapes undone.
+fn unescape(s: str, a: alloc.Allocator) -> alloc.String {
+    var out = alloc.String.init(a);
+    let b = s.bytes();
+    var i: usize = 0;
+    while i < b.len() : (i += 1) {
+        if b[i] == '\\' and i + 1 < b.len() {
+            i += 1;
+            if b[i] == 't' {
+                out.push_str("\t");
+            } else if b[i] == 'n' {
+                out.push_str("\n");
+            } else {
+                out.push_ascii(b[i]);
+            }
+        } else {
+            out.push_ascii(b[i]);
+        }
+    }
+    return out;
+}
+
+/// The notes kept, from text, as save wrote it.
+fn load(state: &mut Notes, text: str, a: alloc.Allocator) {
+    let b = text.bytes();
+    var at: usize = 0;
+    while at < b.len() {
+        var end = at;
+        while end < b.len() and b[end] != '\n' {
+            end += 1;
+        }
+        let l = text[at..end];
+        at = end + 1;
+        var t1: usize = 0;
+        while t1 < l.len() and l.bytes()[t1] != '\t' {
+            t1 += 1;
+        }
+        var t2 = t1 + 1;
+        while t2 < l.len() and l.bytes()[t2] != '\t' {
+            t2 += 1;
+        }
+        if t2 >= l.len() {
+            continue;
+        }
+        let id = number(l[0..t1]);
+        state.all.push(Note { id: id, title: unescape(l[t1 + 1..t2], a: a), body: unescape(l[t2 + 1..l.len()], a: a) });
+        if id >= state.next {
+            state.next = id + 1;
+        }
+    }
+}
+
+/// The number s begins with.
+fn number(s: str) -> u64 {
+    var n: u64 = 0;
+    for c in s.bytes() {
+        if c.* < '0' or c.* > '9' {
+            break;
+        }
+        n = n * 10 + (c.* - '0') as u64;
+    }
+    return n;
+}
+
+/// The first node under the page that selector finds; 0 for none.
+fn first(host: &mut std.Host, selector: str, a: alloc.Allocator) -> u32 {
+    let found = dom.query_all(host, scope: dom.root(host), selector: selector, a: a);
+    if found.len() == 0 {
+        return 0;
+    }
+    return found.items()[0];
+}
+
+/// The key a click on n is: its data-k, or its nearest ancestor's.
+fn key_of(host: &mut std.Host, n: u32, a: alloc.Allocator) -> ?alloc.String {
+    var at = n;
+    var hops: u32 = 0;
+    while at != 0 and hops < 8 : (hops += 1) {
+        match dom.get_attribute(host, item: at, name: "data-k", a: a) {
+            some(k) => { return k; }
+            none => { }
+        }
+        at = dom.parent(host, item: at) orelse 0;
+    }
+    return none;
+}

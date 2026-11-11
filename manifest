@@ -1,0 +1,6 @@
+name: notes
+version: 1
+title: Notes
+about: Notes kept on the phone, in Arche
+publisher: arche
+needs: storage
