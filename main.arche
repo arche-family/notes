@@ -1,17 +1,19 @@
-/// Notes, the Arche phone's, written in Arche, as Android's notes apps
-/// are: the notes as cards, the one changed last first, each its title
-/// and the start of its text; New note, and a note opened to its title and
-/// its text, which are kept as they are typed, with Back and Delete. A
+/// Notes, the Arche phone's, written in Arche (docs/sprints.md T7, T10 in
+/// arche-os), as a phone's notes apps are: the notes as cards, the one
+/// changed last first, each its title and the start of its text; the round
+/// yellow + for a new one, and a note opened to its title and its text,
+/// which are kept as they are typed, with Back's and Delete's icons. A
 /// note left with nothing in it is not kept. An app of the page: its taps
 /// come as click events and its typing as input events. The notes are
 /// kept in the app's storage, a line each: its number, title and text,
 /// parted by tabs, with \ escaping a tab (\t), a line end (\n) and itself.
 import alloc;
+import appkit;
 import dom;
 import host_api;
 import std;
 
-const SHEET: str = "body { padding: 0; } .notes { display: flex; flex-direction: column; gap: 16px; padding: 16px; } .list, .editor { display: flex; flex-direction: column; gap: 12px; } h1 { font-size: 32px; color: var(--nimadir-text); } .cards { display: flex; flex-direction: column; gap: 12px; } .card { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 16px; background: var(--nimadir-surface); } .t { font-size: 18px; color: var(--nimadir-text); } .b { font-size: 15px; color: var(--nimadir-muted); } .empty { font-size: 16px; color: var(--nimadir-muted); } .bar { display: flex; flex-direction: row; gap: 12px; } button { padding: 12px 24px; border-radius: 24px; font-size: 16px; border: 0; background: var(--nimadir-accent-wash); color: var(--nimadir-text); } button.go { background: var(--nimadir-accent); color: var(--nimadir-bg); } input, textarea { padding: 12px; border-radius: 12px; border: 0; background: var(--nimadir-surface); color: var(--nimadir-text); } input { font-size: 22px; } textarea { font-size: 17px; } .hidden { display: none; }";
+const SHEET: str = ".list, .editor { display: flex; flex-direction: column; } .cards { display: flex; flex-direction: column; gap: 10px; padding: 0 14px; } .card { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 18px; background: var(--kit-card); } .t { font-size: 17px; font-weight: 500; color: var(--kit-text); } .b { font-size: 14px; color: var(--kit-muted); } .fab { background: #f5b800; } .editor .head { padding-left: 4px; } input.title { margin: 4px 20px 6px; padding: 0; border: 0; background: transparent; font-size: 26px; font-weight: 500; color: var(--kit-text); } textarea.body { margin: 0 20px; padding: 0; border: 0; background: transparent; font-size: 17px; color: var(--kit-text); } .hidden { display: none; }";
 
 /// How much of a note's text its card shows.
 const PREVIEW: usize = 90;
@@ -38,9 +40,11 @@ type Notes = struct {
 }
 
 fn init(host: &mut std.Host, a: alloc.Allocator) -> Notes {
+    let kit = appkit.css(a);
+    _ = dom.add_stylesheet(host, css: kit.view());
     _ = dom.add_stylesheet(host, css: SHEET);
     let root = dom.root(host);
-    let markup = "<div class='notes'><div class='list'><h1>Notes</h1><button class='go' data-k='new'>New note</button><div class='empty'>No notes yet</div><div class='cards'></div></div><div class='editor hidden'><div class='bar'><button data-k='back'>Back</button><button data-k='delete'>Delete</button></div><input class='title' placeholder='Title'><textarea class='body' rows='10' placeholder='Note'></textarea></div></div>";
+    let markup = "<div class='notes app'><div class='list'><div class='big'>Notes</div><div class='empty'><span class='icon'>sticky_note_2</span><div>No notes yet</div></div><div class='cards'></div><button class='fab' data-k='new'><span class='icon'>add</span></button></div><div class='editor hidden'><div class='head'><button class='iconbtn' data-k='back'><span class='icon'>arrow_back</span></button><button class='iconbtn' data-k='delete'><span class='icon'>delete</span></button></div><input class='title' placeholder='Title'><textarea class='body' rows='10' placeholder='Note'></textarea></div></div>";
     var why = alloc.String.init(a);
     if not dom.set_markup(host, item: root, markup: markup, why: &mut why, a: a) {
         host_api.log(host, msg: why.view());
