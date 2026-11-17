@@ -51,6 +51,7 @@ fn init(host: &mut std.Host, a: alloc.Allocator) -> Notes {
     }
     let notes = first(host, selector: ".notes", a: a);
     dom.listen(host, item: notes, kind: "click");
+    dom.listen(host, item: dom.root(host), kind: "back");
     dom.listen(host, item: notes, kind: "input");
     var state = Notes {
         all: alloc.List(Note).init(a),
@@ -73,7 +74,10 @@ fn init(host: &mut std.Host, a: alloc.Allocator) -> Notes {
 
 fn update(state: &mut Notes, host: &mut std.Host, a: alloc.Allocator) {
     for e in dom.events(host, a: a).items() {
-        if e.kind.view().eq("click") {
+        if e.kind.view().eq("back") {
+            // The phone's Back, in the editor: the note kept, the list.
+            press(state, host: host, key: "back", a: a);
+        } else if e.kind.view().eq("click") {
             match key_of(host, n: e.target, a: a) {
                 some(k) => { press(state, host: host, key: k.view(), a: a); }
                 none => { }
@@ -129,6 +133,8 @@ fn open_note(state: &mut Notes, host: &mut std.Host, id: u64) {
     dom.set_attribute(host, item: state.body, name: "value", value_: n.body.view());
     dom.toggle_class(host, item: state.list, name: "hidden", on: true);
     dom.toggle_class(host, item: state.editor, name: "hidden", on: false);
+    // In the editor, the phone's Back is the page's (data-back).
+    dom.set_attribute(host, item: dom.root(host), name: "data-back", value_: "1");
 }
 
 /// The open note's title, or its text, is text now: it is the one changed
@@ -211,6 +217,7 @@ fn show_list(state: &mut Notes, host: &mut std.Host, a: alloc.Allocator) {
     dom.toggle_class(host, item: state.empty, name: "hidden", on: state.all.len() > 0);
     dom.toggle_class(host, item: state.editor, name: "hidden", on: true);
     dom.toggle_class(host, item: state.list, name: "hidden", on: false);
+    dom.remove_attribute(host, item: dom.root(host), name: "data-back");
 }
 
 /// A div of class with text, last under parent_.
