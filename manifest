@@ -1,6 +1,10 @@
 name: notes
 version: 1
 title: Notes
-about: Notes kept on the phone, in Arche
+about: Notes and lists, kept on your phone
+title.uz: Qaydlar
+about.uz: Qaydlar va roʻyxatlar telefoningizda
+title.ru: Заметки
+about.ru: Заметки и списки на вашем телефоне
 publisher: arche
 needs: storage

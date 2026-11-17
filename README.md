@@ -9,6 +9,8 @@ It works like Android's notes apps:
 - A card opens its note: its title and its text, a field each, the text one of many lines. What is typed is kept as it is typed, and the note goes to the top of the list.
 - Back returns to the list; a note left with nothing in it is not kept. Delete takes the note away.
 
+It speaks the phone's language (English, Uzbek or Russian, as `host-api`'s `locale` says) and makes its page again in the new one when the language changes, at the note it was at; the notes are shown as they were written.
+
 The notes are kept in the app's storage, a line each: the note's number, title and text, parted by tabs, with `\` escaping a tab (`\t`), a line end (`\n`) and itself. It is an app of the page: its taps come as click events, and its typing as input events.
 
 ## Build

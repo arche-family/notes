@@ -7,6 +7,8 @@
 /// come as click events and its typing as input events. The notes are
 /// kept in the app's storage, a line each: its number, title and text,
 /// parted by tabs, with \ escaping a tab (\t), a line end (\n) and itself.
+/// It says its words in the phone's language (host_api.locale): English,
+/// Uzbek or Russian, the page made again when the language changes.
 import alloc;
 import appkit;
 import dom;
@@ -17,6 +19,11 @@ const SHEET: str = ".list, .editor { display: flex; flex-direction: column; } .c
 
 /// How much of a note's text its card shows.
 const PREVIEW: usize = 90;
+
+/// The languages the app speaks.
+const EN: u32 = 0;
+const UZ: u32 = 1;
+const RU: u32 = 2;
 
 type Note = struct {
     id: u64,
@@ -30,6 +37,10 @@ type Notes = struct {
     next: u64,
     /// The note opened; 0 for the list.
     open: u64,
+    /// The phone's language (EN, UZ, RU), and its locale as the phone said
+    /// it, to make the page again when it changes.
+    lang: u32,
+    locale: alloc.String,
     /// The page's nodes.
     list: u32,
     editor: u32,
@@ -43,33 +54,105 @@ fn init(host: &mut std.Host, a: alloc.Allocator) -> Notes {
     let kit = appkit.css(a);
     _ = dom.add_stylesheet(host, css: kit.view());
     _ = dom.add_stylesheet(host, css: SHEET);
-    let root = dom.root(host);
-    let markup = "<div class='notes app'><div class='list'><div class='big'>Notes</div><div class='empty'><span class='icon'>sticky_note_2</span><div>No notes yet</div></div><div class='cards'></div><button class='fab' data-k='new'><span class='icon'>add</span></button></div><div class='editor hidden'><div class='head'><button class='iconbtn' data-k='back'><span class='icon'>arrow_back</span></button><button class='iconbtn' data-k='delete'><span class='icon'>delete</span></button></div><input class='title' placeholder='Title'><textarea class='body' rows='10' placeholder='Note'></textarea></div></div>";
-    var why = alloc.String.init(a);
-    if not dom.set_markup(host, item: root, markup: markup, why: &mut why, a: a) {
-        host_api.log(host, msg: why.view());
-    }
-    let notes = first(host, selector: ".notes", a: a);
-    dom.listen(host, item: notes, kind: "click");
-    dom.listen(host, item: dom.root(host), kind: "back");
-    dom.listen(host, item: notes, kind: "input");
+    let locale = host_api.locale(host, a: a);
     var state = Notes {
         all: alloc.List(Note).init(a),
         next: 1,
         open: 0,
-        list: first(host, selector: ".list", a: a),
-        editor: first(host, selector: ".editor", a: a),
-        cards: first(host, selector: ".cards", a: a),
-        empty: first(host, selector: ".empty", a: a),
-        title: first(host, selector: ".title", a: a),
-        body: first(host, selector: ".body", a: a),
+        lang: lang_of(locale.view()),
+        locale: alloc.String.from(locale.view(), a),
+        list: 0,
+        editor: 0,
+        cards: 0,
+        empty: 0,
+        title: 0,
+        body: 0,
     };
+    page(&mut state, host: host, a: a);
     match host_api.storage_get(host, key: "notes", a: a) {
         some(kept) => { load(&mut state, text: kept.view(), a: a); }
         none => { }
     }
     show_list(&mut state, host: host, a: a);
     return state;
+}
+
+/// The page, in the phone's language: its markup made, and its nodes.
+fn page(state: &mut Notes, host: &mut std.Host, a: alloc.Allocator) {
+    let l = state.lang;
+    let root = dom.root(host);
+    var m = alloc.String.from("<div class='notes app'><div class='list'><div class='big'>", a);
+    m.push_str(say(l, s: "Notes"));
+    m.push_str("</div><div class='empty'><span class='icon'>sticky_note_2</span><div>");
+    m.push_str(say(l, s: "No notes yet"));
+    m.push_str("</div></div><div class='cards'></div><button class='fab' data-k='new'><span class='icon'>add</span></button></div><div class='editor hidden'><div class='head'><button class='iconbtn' data-k='back'><span class='icon'>arrow_back</span></button><button class='iconbtn' data-k='delete'><span class='icon'>delete</span></button></div><input class='title' placeholder='");
+    m.push_str(say(l, s: "Title"));
+    m.push_str("'><textarea class='body' rows='10' placeholder='");
+    m.push_str(say(l, s: "Note"));
+    m.push_str("'></textarea></div></div>");
+    var why = alloc.String.init(a);
+    if not dom.set_markup(host, item: root, markup: m.view(), why: &mut why, a: a) {
+        host_api.log(host, msg: why.view());
+    }
+    let notes = first(host, selector: ".notes", a: a);
+    dom.listen(host, item: notes, kind: "click");
+    dom.listen(host, item: dom.root(host), kind: "back");
+    dom.listen(host, item: notes, kind: "input");
+    state.list = first(host, selector: ".list", a: a);
+    state.editor = first(host, selector: ".editor", a: a);
+    state.cards = first(host, selector: ".cards", a: a);
+    state.empty = first(host, selector: ".empty", a: a);
+    state.title = first(host, selector: ".title", a: a);
+    state.body = first(host, selector: ".body", a: a);
+}
+
+/// The language of a locale the phone says ("uz-UZ", "ru-RU", "en-US").
+fn lang_of(locale: str) -> u32 {
+    if locale.starts_with("uz") {
+        return UZ;
+    }
+    if locale.starts_with("ru") {
+        return RU;
+    }
+    return EN;
+}
+
+/// s, a word or words of the app's in English, in lang: s itself in
+/// English, and for what it has no words for.
+fn say(lang: u32, s: str) -> str {
+    if s.eq("Notes") {
+        if lang == UZ {
+            return "Qaydlar";
+        }
+        if lang == RU {
+            return "Заметки";
+        }
+    }
+    if s.eq("No notes yet") {
+        if lang == UZ {
+            return "Hali qaydlar yoʻq";
+        }
+        if lang == RU {
+            return "Заметок пока нет";
+        }
+    }
+    if s.eq("Title") {
+        if lang == UZ {
+            return "Sarlavha";
+        }
+        if lang == RU {
+            return "Заголовок";
+        }
+    }
+    if s.eq("Note") {
+        if lang == UZ {
+            return "Qayd";
+        }
+        if lang == RU {
+            return "Заметка";
+        }
+    }
+    return s;
 }
 
 fn update(state: &mut Notes, host: &mut std.Host, a: alloc.Allocator) {
@@ -88,6 +171,19 @@ fn update(state: &mut Notes, host: &mut std.Host, a: alloc.Allocator) {
             } else if e.target == state.body {
                 typed(state, host: host, title: false, text: e.value.view(), a: a);
             }
+        }
+    }
+    // The phone's language changed: the page made again in it, at the list
+    // or the note it was at.
+    let locale = host_api.locale(host, a: a);
+    if not locale.view().eq(state.locale.view()) {
+        state.lang = lang_of(locale.view());
+        state.locale = alloc.String.from(locale.view(), a);
+        page(state, host: host, a: a);
+        let was = state.open;
+        show_list(state, host: host, a: a);
+        if was != 0 {
+            open_note(state, host: host, id: was);
         }
     }
 }
